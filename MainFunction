@@ -1,0 +1,100 @@
+album_sheet = read.csv('c:\\Users\\16308\\Documents\\VSCPython\\album_safe2.csv',header = TRUE)
+album_sheet = album_sheet[1:13]
+library(ggplot2)
+mean(album_sheet$Aidan_Score)
+mean(album_sheet$Jaden_Score)
+ggplot(album_sheet, aes(x = Aidan_Score, y = Jaden_Score)) + geom_point(size = 3) + geom_abline(slope = 1) + ggtitle("Album Scores")+theme(plot.title = element_text(hjust = 0.5))+xlab("Aidan Score")+ ylab("Jaden Score")
+ggplot(album_sheet, aes(x = Follower_count.mil., y = Aidan_Score)) + geom_point(size = 3) + geom_abline(slope = 1) + ggtitle("Album Scores")+theme(plot.title = element_text(hjust = 0.5))+xlab("Aidan Score")+ ylab("Jaden Score")
+album_sheet$Follower_count.mil.
+
+album_sheet
+
+#ggplot(data = filter(album_sheet, album_sheet$Genre == "RNB"), mapping = aes(x = album_sheet$Jaden_Score, y = album_sheet$Genre))
+
+ggplot(album_sheet)+geom_histogram(aes(x = Jaden_Score, stat = "count",fill = Aidan_Score < Jaden_Score)) + ylab("Number of occurences") + ggtitle("Jaden Scores")+theme(plot.title = element_text(hjust = 0.5))
+ggplot(album_sheet)+geom_histogram(aes(x = Aidan_Score, stat = "count", fill = Aidan_Score > Jaden_Score)) + ylab("Number of occurences") + ggtitle("Aidan Scores")+theme(plot.title = element_text(hjust = 0.5))
+
+
+
+
+aidan_mean_genre = aggregate(Aidan_Score~Genre+Who_Put_It,album_sheet,mean)
+jaden_mean_genre = aggregate(Jaden_Score~Genre+Who_Put_It,album_sheet,mean)
+aidan_mean_genre2 = aggregate(Aidan_Score~Genre,album_sheet,mean)
+jaden_mean_genre2 = aggregate(Jaden_Score~Genre,album_sheet,mean)
+aidan_mean_genre2
+jaden_mean_genre2
+combine_lists = merge(aidan_mean_genre,jaden_mean_genre)
+library(reshape)
+combine_lists
+ library("dplyr")
+aidan_mean_genre_test =  aggregate(Aidan_Score~Genre+Who_Put_It,album_sheet,mean) + count(album_sheet, Genre)
+
+#ggplot(combine_lists)+geom_point(aes(x = Genre, y = Aidan_Score))+stat_summary(aes(x = Genre, y = after_stat(Aidan_Score/2)), fun = mean, colour = "Blue") 
+
+ggplot(album_sheet) + geom_point(aes(x = Year, y = Aidan_Score)) + facet_wrap(~ Genre)
+ggplot(album_sheet) + geom_point(aes(x = Follower_count.mil., y = Jaden_Score)) + facet_grid(Who_Put_It~ Genre,scales = 'free_x') + ggtitle("Jaden Scores by Genre/Follower Count/album Selector")+theme(plot.title = element_text(hjust = 0.5))
+ggplot(album_sheet) + geom_point(aes(x = Follower_count.mil., y = Aidan_Score)) + facet_grid(Who_Put_It~ Genre,scales = 'free_x') + ggtitle("Aidan Scores by Genre/Follower Count/album Selector")+theme(plot.title = element_text(hjust = 0.5))
+
+
+ggplot(combine_lists)+geom_point(size = 8,aes(x = Genre, y = Aidan_Score, colour = Who_Put_It,label = "Aidan")) + geom_point(size = 4,aes(x = Genre, y = Jaden_Score, colour = Who_Put_It)) + ggtitle("Mean score by genre")+theme(plot.title = element_text(hjust = 0.5))
+ggplot(combine_lists, aes(colour = Who_Put_It))+ geom_point(aes(x = Genre, y = Jaden_Score))+  geom_point(aes(x = Genre, y = Aidan_Score)) + scale_color_brewer() + scale_size(breaks = c(4,5,6,7))
+
+
+ggplot(album_sheet)+geom_bar(aes(x = Genre)) + coord_polar() + coord_cartesian(ylim = c(5,40))
+
+
+#STATISICAL TESTS
+
+model = lm(Aidan_Score ~ Jaden_Score, album_sheet)
+model
+summary(model)
+
+
+
+
+data1 = subset(album_sheet$Aidan_Score, album_sheet$Genre == "Rap")
+data2 = subset(album_sheet$Jaden_Score, album_sheet$Genre == "Rap")
+#Is there a way to do a t test to check if the samples are different within a certain range?
+t.test(data1,data2,paired = TRUE)
+anova_model = aov(Aidan_Score~Year, album_sheet)
+anova_model
+install.packages("pheatmap")
+library(pheatmap)
+
+
+pheatmap(album_sheet[,3:4], cluster_rows = TRUE, cluster_cols = TRUE, clustering_method = "complete")
+
+install.packages(c("FactoMineR","factoextra"))
+library(FactoMineR)
+library(factoextra)
+
+PCA(album_sheet[,3:4],scale.unit = FALSE, ncp = 5)
+??pca
+
+cor(y = album_sheet$Jaden_Score,x = album_sheet$Aidan_Score)
+
+album_sheet_key = album_sheet[1:2]
+album_sheet_values = album_sheet[3:13]
+collumn_name_list = colnames(album_sheet_values)
+collumn_name_list
+
+model = lm(Jaden_Score ~ Genre, album_sheet_values)
+model
+summary(model)
+
+
+
+for(collumn in album_sheet_values[3:11]){
+  print(collumn)
+  model = lm(Aidan_Score ~ collumn, album_sheet_values)
+  print(summary(model))
+}
+
+for(collumn in album_sheet_values[3:11]){
+  print(collumn)
+  model = lm(Jaden_Score ~ collumn, album_sheet_values)
+  print(summary(model))
+}
+colnames(album_sheet_values)
+model = lm(Aidan_Score ~ Jaden_Score+Genre+Who_Put_It+Subgenre+Race+Solo.or.Band+Gender+Length+Year+Follower_count.mil., album_sheet_values)
+summary(model)
